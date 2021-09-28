@@ -291,7 +291,7 @@ Possible projections example (3 projections) for the example above:
 | Included fields |
 |-|
 
-|Field|CultureName|Description|
+|Field|Name|Description|
 |------|---------|---------|
 |Customer.Organization.Name<!---->|Organization|Show customer-associated organization name in the list|
 |Customer.Name<!---->|Customer|Show customer name in the list|
@@ -314,7 +314,7 @@ Possible projections example (3 projections) for the example above:
 | Included fields |
 |-|
 
-|Field|CultureName|Description|
+|Field|Name|Description|
 |------|---------|---------|
 |Product|Product|Used to select product from dropdown or lookup control|
 |Product.Name<!---->|Product|Product name|
@@ -337,7 +337,7 @@ Possible projections example (3 projections) for the example above:
 | Included fields |
 |-|
 
-|Field|CultureName|Description|
+|Field|Name|Description|
 |------|---------|---------|
 |Customer|Customer|Used to select customer from dropdown or lookup control|
 |Customer.Organization.Name<!---->|Organization| Show customer's organization for notice|
