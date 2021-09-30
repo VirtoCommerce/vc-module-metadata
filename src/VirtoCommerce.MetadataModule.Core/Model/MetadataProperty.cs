@@ -3,9 +3,9 @@ namespace VirtoCommerce.MetadataModule.Core.Model
     /// <summary>
     /// Definition of the property in the projection
     /// </summary>
-    public class PropertyInProjection
+    public class MetadataProperty
     {
-        public PropertyInProjection()
+        public MetadataProperty()
         {
         }
 

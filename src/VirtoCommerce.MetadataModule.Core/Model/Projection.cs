@@ -35,29 +35,32 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         /// <summary>
         /// Properties or fields of the model class, represented as the single value
         /// </summary>
-        public PropertyInProjection[] Properties { get; set; } = new PropertyInProjection[0];
+        public MetadataProperty[] Properties { get; set; } = new MetadataProperty[0];
 
         /// <summary>
         /// Details (instances, referenced by composition at the side with cardinality *)
         /// </summary>
-        public DetailInProjection[] Details { get; set; } = new DetailInProjection[0];
+        public References[] References { get; set; } = new References[0];
 
         /// <summary>
         /// Masters (instances, referenced by association at the side with cardinality 0..1 or 1)
         /// </summary>
-        public MasterInProjection[] Masters { get; set; } = new MasterInProjection[0];
+        public Roots[] Roots { get; set; } = new Roots[0];
 
         public object Clone()
         {
-            var res = (Projection)MemberwiseClone();
-            res.Properties = new PropertyInProjection[Properties.Length];
-            Properties.CopyTo(res.Properties, 0);
-            res.Masters = new MasterInProjection[Masters.Length];
-            Masters.CopyTo(res.Masters, 0);
-            res.Details = new DetailInProjection[Details.Length];
-            Details.CopyTo(res.Details, 0);
+            var clone = (Projection)MemberwiseClone();
 
-            return res;
+            clone.Properties = new MetadataProperty[Properties.Length];
+            Properties.CopyTo(clone.Properties, 0);
+
+            clone.Roots = new Roots[Roots.Length];
+            Roots.CopyTo(clone.Roots, 0);
+
+            clone.References = new References[References.Length];
+            References.CopyTo(clone.References, 0);
+
+            return clone;
         }
 
         public Projection()
@@ -69,7 +72,6 @@ namespace VirtoCommerce.MetadataModule.Core.Model
             DefineClassType = modelType;
             AddProperties(props.ToArray());
         }
-
 
         /// <summary>
         /// Create default projection (include all the fields).
@@ -97,13 +99,12 @@ namespace VirtoCommerce.MetadataModule.Core.Model
                 {
                     simpleprops.Add(prop);
                 }
-
             }
 
-            Properties = new PropertyInProjection[simpleprops.Count];
+            Properties = new MetadataProperty[simpleprops.Count];
             for (var i = 0; i < simpleprops.Count; i++)
             {
-                Properties[i] = new PropertyInProjection()
+                Properties[i] = new MetadataProperty()
                 {
                     Caption = simpleprops[i],
                     Name = simpleprops[i]
@@ -112,13 +113,12 @@ namespace VirtoCommerce.MetadataModule.Core.Model
 
             if (readType == ReadType.RelatedDetails)
             {
-                Details = new DetailInProjection[detailprops.Count];
+                References = new References[detailprops.Count];
                 for (var i = 0; i < detailprops.Count; i++)
                 {
-                    Details[i] = new DetailInProjection() { Name = detailprops[i], Projection = new Projection(Information.GetItemType(DefineClassType, detailprops[i]), ReadType.OnlyThat), Visible = true };
+                    References[i] = new References() { Name = detailprops[i], Projection = new Projection(Information.GetItemType(DefineClassType, detailprops[i]), ReadType.OnlyThat), Visible = true };
                 }
             }
-
         }
 
         /// <summary>
@@ -145,17 +145,17 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         /// </summary>
         /// <param name="masterName"></param>
         /// <returns></returns>
-        public MasterInProjection GetMaster(string masterName)
+        public Roots GetMaster(string masterName)
         {
-            if (Masters == null)
-                Masters = new MasterInProjection[0];
+            if (Roots == null)
+                Roots = new Roots[0];
 
-            for (var i = 0; i < Masters.Length; i++)
-                if (Masters[i].Name == masterName)
-                    return Masters[i];
+            for (var i = 0; i < Roots.Length; i++)
+                if (Roots[i].Name == masterName)
+                    return Roots[i];
             for (var i = 0; i < Properties.Length; i++)
                 if (Properties[i].Name.StartsWith(masterName + "."))
-                    return new MasterInProjection() { Name = masterName, LookupType = LookupType.Standard };
+                    return new Roots() { Name = masterName, LookupType = LookupType.Standard };
 
             throw new ArgumentOutOfRangeException(masterName);
         }
@@ -166,11 +166,11 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         /// <param name="masterName"></param>
         public void RemoveMaster(string masterName)
         {
-            if (Masters == null)
-                Masters = new MasterInProjection[0];
-            if (Masters.Length == 0) return;
+            if (Roots == null)
+                Roots = new Roots[0];
+            if (Roots.Length == 0) return;
 
-            Masters = Masters.SkipWhile(x => x.Name == masterName).ToArray();
+            Roots = Roots.SkipWhile(x => x.Name == masterName).ToArray();
         }
 
         /// <summary>
@@ -178,14 +178,14 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         /// </summary>
         /// <param name="detailName"></param>
         /// <returns></returns>
-        public DetailInProjection GetDetail(string detailName)
+        public References GetDetail(string detailName)
         {
-            if (Details == null)
-                Details = new DetailInProjection[0];
-            if (Details.Length == 0)
+            if (References == null)
+                References = new References[0];
+            if (References.Length == 0)
                 throw new ArgumentOutOfRangeException(detailName);
 
-            var result = Details.FirstOrDefault(x => x.Name == detailName);
+            var result = References.FirstOrDefault(x => x.Name == detailName);
             if (result == null)
             {
                 throw new ArgumentOutOfRangeException(detailName, "No such detail property/field found.");
@@ -200,11 +200,11 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         /// <param name="detailname"></param>
         public void RemoveDetail(string detailname)
         {
-            if (Details == null)
-                Details = new DetailInProjection[0];
-            if (Details.Length == 0) return;
+            if (References == null)
+                References = new References[0];
+            if (References.Length == 0) return;
 
-            Details = Details.SkipWhile(x => x.Name == detailname).ToArray();
+            References = References.SkipWhile(x => x.Name == detailname).ToArray();
         }
 
         /// <summary>
@@ -212,10 +212,10 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         /// </summary>
         /// <param name="propertyName"></param>
         /// <returns></returns>
-        public PropertyInProjection GetProperty(string propertyName)
+        public MetadataProperty GetProperty(string propertyName)
         {
             if (Properties == null)
-                Properties = new PropertyInProjection[0];
+                Properties = new MetadataProperty[0];
             if (Properties.Length == 0)
                 throw new ArgumentOutOfRangeException(propertyName);
 
@@ -248,7 +248,7 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         public bool CheckPropname(string propName, bool checkDetails)
         {
             return Properties.Any(x => x.Name == propName)
-                || (checkDetails && Details.Any(x => x.Name == propName));
+                || (checkDetails && References.Any(x => x.Name == propName));
         }
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         public void RemoveProperty(string propName)
         {
             if (Properties == null)
-                Properties = new PropertyInProjection[0];
+                Properties = new MetadataProperty[0];
             if (Properties.Length == 0) return;
 
             Properties = Properties.SkipWhile(x => x.Name == propName).ToArray();
@@ -287,16 +287,15 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         /// <param name="aggregateFunctions"></param>
         public void AddDetailInProjection(string detailname, Projection detailProjection, bool loadOnLoadAgregator, string path, bool visible, string caption, string[] aggregateFunctions)
         {
-            if (Details == null)
-                Details = new DetailInProjection[0];
-            for (var i = 0; i < Details.Length; i++)
-                if (Details[i].Name == detailname)
+            if (References == null)
+                References = new References[0];
+            for (var i = 0; i < References.Length; i++)
+                if (References[i].Name == detailname)
                     return;
-            var divs = Details;
-            Details = new DetailInProjection[divs.Length + 1];
-            divs.CopyTo(Details, 0);
-            Details[divs.Length] = new DetailInProjection() { Name = detailname, Projection = detailProjection, LoadOnLoadAgregator = loadOnLoadAgregator, FormPath = path, Caption = caption, Visible = visible };
-
+            var divs = References;
+            References = new References[divs.Length + 1];
+            divs.CopyTo(References, 0);
+            References[divs.Length] = new References() { Name = detailname, Projection = detailProjection, LoadOnLoadAgregator = loadOnLoadAgregator, FormPath = path, Caption = caption, Visible = visible };
         }
 
         /// <summary>
@@ -308,21 +307,20 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         /// <param name="lookupProperty"></param>
         public void AddMasterInProjection(string masterName, LookupType lookupType, string lookupcustomizationstring, string lookupProperty)
         {
-            if (Masters == null)
-                Masters = new MasterInProjection[0];
-            for (var i = 0; i < Masters.Length; i++)
-                if (Masters[i].Name == masterName)
+            if (Roots == null)
+                Roots = new Roots[0];
+            for (var i = 0; i < Roots.Length; i++)
+                if (Roots[i].Name == masterName)
                     return;
-            var oldmasters = Masters;
-            Masters = new MasterInProjection[oldmasters.Length + 1];
-            oldmasters.CopyTo(Masters, 0);
+            var oldmasters = Roots;
+            Roots = new Roots[oldmasters.Length + 1];
+            oldmasters.CopyTo(Roots, 0);
 
-            Masters[oldmasters.Length] = new MasterInProjection() { Name = masterName, LookupType = lookupType, CustomizationString = lookupcustomizationstring, LookupProperty = lookupProperty };
+            Roots[oldmasters.Length] = new Roots() { Name = masterName, LookupType = lookupType, CustomizationString = lookupcustomizationstring, LookupProperty = lookupProperty };
             if (lookupProperty != string.Empty && !CheckPropname(masterName + "." + lookupProperty))
             {
                 AddProperty(masterName + "." + lookupProperty);
             }
-
         }
 
         /// <summary>
@@ -376,16 +374,15 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         {
             lock (this)
             {
-
                 // Check if exists
                 if (Properties == null)
-                    Properties = new PropertyInProjection[0];
+                    Properties = new MetadataProperty[0];
                 for (var i = 0; i < Properties.Length; i++)
                     if (Properties[i].Name == propName)
                         return;
                 // Increase the count
                 var piv = Properties;
-                Properties = new PropertyInProjection[piv.Length + 1];
+                Properties = new MetadataProperty[piv.Length + 1];
                 piv.CopyTo(Properties, 0);
                 var propIndex = piv.Length;
 
@@ -419,11 +416,11 @@ namespace VirtoCommerce.MetadataModule.Core.Model
                             if (propsind != 0)
                             {
                                 piv = Properties;
-                                Properties = new PropertyInProjection[piv.Length + 1];
+                                Properties = new MetadataProperty[piv.Length + 1];
                                 piv.CopyTo(Properties, 0);
                             }
                             if (propCaption == string.Empty && pref == string.Empty)
-                                Properties[propIndex++] = new PropertyInProjection()
+                                Properties[propIndex++] = new MetadataProperty()
                                 {
                                     Name = pref + allprops[propsind],
                                     Caption = propCaption + allprops[propsind],
@@ -437,7 +434,7 @@ namespace VirtoCommerce.MetadataModule.Core.Model
                 }
                 else
                 {
-                    Properties[propIndex++] = new PropertyInProjection()
+                    Properties[propIndex++] = new MetadataProperty()
                     {
                         Name = propName,
                         Caption = propCaption,
@@ -459,7 +456,6 @@ namespace VirtoCommerce.MetadataModule.Core.Model
                     DefineClassType = null;
                 else
                 {
-
                     DefineClassType = Type.GetType(value, true);
                 }
             }
@@ -475,7 +471,7 @@ namespace VirtoCommerce.MetadataModule.Core.Model
         }
 
         /// <summary>
-        /// Represent full projection 
+        /// Represent full projection
         /// </summary>
         /// <param name="fullProjection"></param>
         /// <returns></returns>
@@ -498,7 +494,7 @@ namespace VirtoCommerce.MetadataModule.Core.Model
                 res.Append(")");
             }
 
-            foreach (var div in Details)
+            foreach (var div in References)
             {
                 res.Append("{");
                 res.Append(div.Name);
@@ -536,12 +532,11 @@ namespace VirtoCommerce.MetadataModule.Core.Model
             Result.Name = firstProjection.Name + "|" + secondProjection.Name;
             var temp = new SortedList();
 
-            var pivList = new List<PropertyInProjection>();
+            var pivList = new List<MetadataProperty>();
             pivList.AddRange(firstProjection.Properties);
 
             foreach (var piv in secondProjection.Properties)
             {
-
                 var index = pivList.FindIndex(p => p.Name == piv.Name);
                 if (index >= 0)
                 {
@@ -558,8 +553,6 @@ namespace VirtoCommerce.MetadataModule.Core.Model
             }
             Result.Properties = pivList.ToArray();
 
-
-
             //properties
             for (var i = 0; i < secondProjection.Properties.Length; i++)
                 temp.Add(secondProjection.Properties[i].Name, secondProjection.Properties[i]);
@@ -568,35 +561,33 @@ namespace VirtoCommerce.MetadataModule.Core.Model
                     temp.Add(firstProjection.Properties[i].Name, firstProjection.Properties[i]);
                 else
                 {
-                    var p = (PropertyInProjection)temp[firstProjection.Properties[i].Name];
+                    var p = (MetadataProperty)temp[firstProjection.Properties[i].Name];
                     p.Visible = p.Visible || firstProjection.Properties[i].Visible;
                     p.Caption = p.Caption + " / " + firstProjection.Properties[i].Caption;
                     temp[firstProjection.Properties[i].Name] = p;
                 }
-            var props = new PropertyInProjection[temp.Count];
+            var props = new MetadataProperty[temp.Count];
             temp.Values.CopyTo(props, 0);
             Result.Properties = props;
 
-
             //detail-properties
             temp.Clear();
-            for (var i = 0; i < secondProjection.Details.Length; i++)
-                temp.Add(secondProjection.Details[i].Name, secondProjection.Details[i]);
-            for (var i = 0; i < firstProjection.Details.Length; i++)
-                if (!temp.ContainsKey(firstProjection.Details[i].Name))
-                    temp.Add(firstProjection.Details[i].Name, firstProjection.Details[i]);
+            for (var i = 0; i < secondProjection.References.Length; i++)
+                temp.Add(secondProjection.References[i].Name, secondProjection.References[i]);
+            for (var i = 0; i < firstProjection.References.Length; i++)
+                if (!temp.ContainsKey(firstProjection.References[i].Name))
+                    temp.Add(firstProjection.References[i].Name, firstProjection.References[i]);
                 else
                 {
-                    var v = (DetailInProjection)temp[firstProjection.Details[i].Name];
-                    v.LoadOnLoadAgregator = v.LoadOnLoadAgregator || firstProjection.Details[i].LoadOnLoadAgregator;
-                    v.Projection = v.Projection | firstProjection.Details[i].Projection;
-                    temp[firstProjection.Details[i].Name] = v;
+                    var v = (References)temp[firstProjection.References[i].Name];
+                    v.LoadOnLoadAgregator = v.LoadOnLoadAgregator || firstProjection.References[i].LoadOnLoadAgregator;
+                    v.Projection = v.Projection | firstProjection.References[i].Projection;
+                    temp[firstProjection.References[i].Name] = v;
                 }
-            var dets = new DetailInProjection[temp.Count];
+            var dets = new References[temp.Count];
             temp.Values.CopyTo(dets, 0);
-            Result.Details = dets;
+            Result.References = dets;
             return Result;
-
         }
 
         public static Projection operator &(Projection firstProjection, Projection secondProjection)
@@ -613,21 +604,21 @@ namespace VirtoCommerce.MetadataModule.Core.Model
             for (var i = 0; i < firstProjection.Properties.Length; i++)
                 if (temp.ContainsKey(firstProjection.Properties[i].Name))
                     temp1.Add(firstProjection.Properties[i].Name, firstProjection.Properties[i]);
-            var props = new PropertyInProjection[temp1.Count];
+            var props = new MetadataProperty[temp1.Count];
             temp1.Values.CopyTo(props, 0);
             Result.Properties = props;
 
             //detail-properties
             temp.Clear();
             temp1.Clear();
-            for (var i = 0; i < secondProjection.Details.Length; i++)
-                temp.Add(secondProjection.Details[i].Name, secondProjection.Details[i]);
-            for (var i = 0; i < firstProjection.Details.Length; i++)
-                if (temp.ContainsKey(firstProjection.Details[i].Name))
+            for (var i = 0; i < secondProjection.References.Length; i++)
+                temp.Add(secondProjection.References[i].Name, secondProjection.References[i]);
+            for (var i = 0; i < firstProjection.References.Length; i++)
+                if (temp.ContainsKey(firstProjection.References[i].Name))
                 {
-                    var div1 = (DetailInProjection)temp[firstProjection.Details[i].Name];
-                    var div2 = firstProjection.Details[i];
-                    var resdiv = new DetailInProjection()
+                    var div1 = (References)temp[firstProjection.References[i].Name];
+                    var div2 = firstProjection.References[i];
+                    var resdiv = new References()
                     {
                         Name = div1.Name,
                         Projection = div1.Projection & div1.Projection,
@@ -637,17 +628,16 @@ namespace VirtoCommerce.MetadataModule.Core.Model
                         Visible = div1.Visible && div2.Visible,
                         Order = div2.Order
                     };
-                    temp1.Add(firstProjection.Details[i].Name, resdiv);
+                    temp1.Add(firstProjection.References[i].Name, resdiv);
                 }
-            var dets = new DetailInProjection[temp1.Count];
+            var dets = new References[temp1.Count];
             temp1.Values.CopyTo(dets, 0);
-            Result.Details = dets;
+            Result.References = dets;
             return Result;
         }
 
         public static Projection operator -(Projection firstProjection, Projection secondProjection)
         {
-
             var Result = getProjectionForProjections(firstProjection, secondProjection);
             Result.Name = firstProjection.ToString() + "-" + secondProjection.ToString();
             var temp = new SortedList();
@@ -659,23 +649,22 @@ namespace VirtoCommerce.MetadataModule.Core.Model
             for (var i = 0; i < secondProjection.Properties.Length; i++)
                 if (temp.ContainsKey(secondProjection.Properties[i].Name))
                     temp.Remove(secondProjection.Properties[i].Name);
-            var props = new PropertyInProjection[temp.Count];
+            var props = new MetadataProperty[temp.Count];
             temp.Values.CopyTo(props, 0);
             Result.Properties = props;
-
 
             //detail-properties
             temp.Clear();
             temp1.Clear();
 
-            for (var i = 0; i < firstProjection.Details.Length; i++)
-                temp.Add(firstProjection.Details[i].Name, firstProjection.Details[i]);
-            for (var i = 0; i < secondProjection.Details.Length; i++)
-                if (temp.ContainsKey(secondProjection.Details[i].Name))
-                    temp.Remove(secondProjection.Details[i].Name);
-            var dets = new DetailInProjection[temp.Count];
+            for (var i = 0; i < firstProjection.References.Length; i++)
+                temp.Add(firstProjection.References[i].Name, firstProjection.References[i]);
+            for (var i = 0; i < secondProjection.References.Length; i++)
+                if (temp.ContainsKey(secondProjection.References[i].Name))
+                    temp.Remove(secondProjection.References[i].Name);
+            var dets = new References[temp.Count];
             temp.Values.CopyTo(dets, 0);
-            Result.Details = dets;
+            Result.References = dets;
             return Result;
         }
 
@@ -694,7 +683,6 @@ namespace VirtoCommerce.MetadataModule.Core.Model
 
         public int[] GetOrderedIndexes(string[] orderCols, string[] advCols, bool returnOrderIndexForPropery)
         {
-
             var DestProps = GetOrderedProperies(orderCols, advCols, out List<string> AllProps);
             if (returnOrderIndexForPropery)
                 return AllProps.Select(x => DestProps.FindIndex(y => y == x)).ToArray();

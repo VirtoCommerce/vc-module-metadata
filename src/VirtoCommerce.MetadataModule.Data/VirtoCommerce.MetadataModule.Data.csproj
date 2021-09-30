@@ -9,13 +9,12 @@
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <DocumentationFile>D:\AK\Code\Projects\VC3-DEV-CORE3\modules\vc-module-metadata\src\VirtoCommerce.MetadataModule.Data\VirtoCommerce.MetadataModule.Data.xml</DocumentationFile>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.81.0" />
         <PackageReference Include="VirtoCommerce.Platform.Data" Version="3.81.0" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\VirtoCommerce.MetadataModule.Core\VirtoCommerce.MetadataModule.Core.csproj" />
+        <ProjectReference Include="..\VirtoCommerce.MetadataModule.Core\VirtoCommerce.MetadataModule.Core.csproj" />
     </ItemGroup>
 </Project>

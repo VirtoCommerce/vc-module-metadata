@@ -3,10 +3,10 @@ namespace VirtoCommerce.MetadataModule.Core.Model
     /// <summary>
     /// Master in the projection definition
     /// </summary>
-    public class MasterInProjection
+    public class Roots
     {
 
-        public MasterInProjection()
+        public Roots()
         {
         }
 

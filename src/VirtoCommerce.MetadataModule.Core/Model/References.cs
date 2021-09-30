@@ -7,10 +7,10 @@ namespace VirtoCommerce.MetadataModule.Core.Model
     /// Detail projection in the aggregator projection
     /// </summary>
     [Serializable]
-    public class DetailInProjection
+    public class References
     {
 
-        public DetailInProjection()
+        public References()
         {
 
         }
