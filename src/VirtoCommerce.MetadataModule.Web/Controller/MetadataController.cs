@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
 using VirtoCommerce.MetadataModule.Core.Model;
 using VirtoCommerce.MetadataModule.Core.Services;
 
@@ -14,6 +9,7 @@ namespace VirtoCommerce.MetadataModule.Web.Controllers.Api
     public class MetadataController : Controller
     {
         private readonly IMetadataService _metadataService;
+
         public MetadataController(IMetadataService metadataService)
         {
             _metadataService = metadataService;
